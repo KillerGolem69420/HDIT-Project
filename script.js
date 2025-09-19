@@ -17,7 +17,10 @@ VANTA.GLOBE({
     size: 0.8
 });
 
-// Chat functionality
+// Chat functionality - UPDATE THIS IP ADDRESS!
+const RASPBERRY_PI_IP = '192.168.0.7'; // ⬅️ CHANGE THIS to your Pi's IP
+const API_URL = `http://${RASPBERRY_PI_IP}:8080/v1/chat/completions`;
+
 const chatContainer = document.getElementById('chat-container');
 const userInput = document.getElementById('user-input');
 const sendBtn = document.getElementById('send-btn');
@@ -26,10 +29,6 @@ const voiceInput = document.getElementById('voice-input');
 const settingsBtn = document.getElementById('settings-btn');
 const settingsModal = document.getElementById('settings-modal');
 const closeSettings = document.getElementById('close-settings');
-
-// Configuration - UPDATE THIS WITH YOUR RASPBERRY PI'S IP
-const RASPBERRY_PI_IP = '192.168.0.7'; // Change to your Pi's IP
-const API_URL = `http://${RASPBERRY_PI_IP}:8080/completion`;
 
 let ttsEnabled = true;
 let recognition;
@@ -64,21 +63,24 @@ async function sendMessage() {
         </div>
     `;
     chatContainer.appendChild(typingIndicator);
-    chatContainer.scrollTop = chatContainer.scrollHeight;
+    scrollToBottom();
     feather.replace();
 
     try {
-        // Send request to llama.cpp server on Raspberry Pi
+        // Use the chat completions endpoint for better formatting
         const response = await fetch(API_URL, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json'
             },
             body: JSON.stringify({
-                prompt: message,
-                n_predict: 100,
+                messages: [
+                    { role: "system", content: "You are a helpful assistant." },
+                    { role: "user", content: message }
+                ],
+                max_tokens: 100,
                 temperature: 0.7,
-                stop: ['\n', 'User:']
+                stream: false
             })
         });
 
@@ -87,32 +89,28 @@ async function sendMessage() {
         }
 
         const data = await response.json();
-        
-        // Remove typing indicator
         chatContainer.removeChild(typingIndicator);
         
-        // Add AI response
-        addMessage(data.content, 'ai');
+        // Extract the response text
+        const aiResponse = data.choices[0].message.content;
+        addMessage(aiResponse, 'ai');
         
         // Speak the response if TTS is enabled
         if (ttsEnabled) {
-            speak(data.content);
+            speak(aiResponse);
         }
-    } catch (error) {
-        // Remove typing indicator
-        chatContainer.removeChild(typingIndicator);
         
-        // Show error message
-        addMessage('Error connecting to AI: ' + error.message, 'ai');
+    } catch (error) {
+        chatContainer.removeChild(typingIndicator);
+        addMessage('Error: ' + error.message, 'ai');
         console.error('Error:', error);
     }
 }
 
-// Add message to chat
+// Add message to chat with improved animation
 function addMessage(text, sender) {
     const messageDiv = document.createElement('div');
     messageDiv.className = `message-bubble ${sender}-bubble`;
-    messageDiv.setAttribute('data-aos', sender === 'user' ? 'fade-left' : 'fade-right');
     
     if (sender === 'ai') {
         messageDiv.innerHTML = `
@@ -137,8 +135,13 @@ function addMessage(text, sender) {
     }
     
     chatContainer.appendChild(messageDiv);
-    chatContainer.scrollTop = chatContainer.scrollHeight;
+    scrollToBottom();
     feather.replace();
+}
+
+// Scroll to bottom of chat
+function scrollToBottom() {
+    chatContainer.scrollTop = chatContainer.scrollHeight;
 }
 
 // Text-to-speech function

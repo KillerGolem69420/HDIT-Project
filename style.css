@@ -8,18 +8,22 @@
     padding: 1rem 1.5rem;
     margin-bottom: 1rem;
     position: relative;
+    animation-duration: 0.5s;
+    animation-fill-mode: both;
 }
 
 .user-bubble {
     background-color: #3b82f6;
     color: white;
     align-self: flex-end;
+    animation-name: fadeInLeft;
 }
 
 .ai-bubble {
     background-color: #f3f4f6;
     color: #111827;
     align-self: flex-start;
+    animation-name: fadeInRight;
 }
 
 .pulse {
@@ -32,16 +36,46 @@
     100% { opacity: 1; }
 }
 
+@keyframes fadeInLeft {
+    from {
+        opacity: 0;
+        transform: translate3d(30px, 0, 0);
+    }
+    to {
+        opacity: 1;
+        transform: translate3d(0, 0, 0);
+    }
+}
+
+@keyframes fadeInRight {
+    from {
+        opacity: 0;
+        transform: translate3d(-30px, 0, 0);
+    }
+    to {
+        opacity: 1;
+        transform: translate3d(0, 0, 0);
+    }
+}
+
 /* Prevent body scrolling */
 body {
     overflow: hidden;
+    margin: 0;
+    padding: 0;
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
 }
 
 /* Make chat container scrollable */
 #chat-container {
     overflow-y: auto;
-    max-height: calc(100vh - 200px);
-    padding-right: 10px;
+    flex: 1;
+    padding: 1rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
 }
 
 /* Custom scrollbar for chat container */
@@ -66,4 +100,27 @@ body {
 /* Ensure the main container doesn't scroll */
 main {
     overflow: hidden !important;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+}
+
+/* GitHub corner ribbon */
+.github-corner:hover .octo-arm {
+    animation: octocat-wave 560ms ease-in-out;
+}
+
+@keyframes octocat-wave {
+    0%, 100% { transform: rotate(0); }
+    20%, 60% { transform: rotate(-25deg); }
+    40%, 80% { transform: rotate(10deg); }
+}
+
+@media (max-width: 500px) {
+    .github-corner:hover .octo-arm {
+        animation: none;
+    }
+    .github-corner .octo-arm {
+        animation: octocat-wave 560ms ease-in-out;
+    }
 }
