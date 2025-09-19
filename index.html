@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI with TTS and LLM Interaction</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container">
+        <h1>AI with TTS and LLM Interaction</h1>
+        
+        <div class="input-section">
+            <textarea id="input-text" placeholder="Enter your text here..."></textarea>
+            <div class="controls">
+                <select id="voice-select">
+                    <option value="">Select a voice...</option>
+                </select>
+                <button id="generate-btn">Generate Response</button>
+                <button id="speak-btn" disabled>Speak Response</button>
+            </div>
+        </div>
+        
+        <div class="response-section">
+            <div class="response-header">
+                <h2>AI Response</h2>
+            </div>
+            <div id="response-content" class="response-content">
+                <p style="color: #aaa; text-align: center; padding: 40px 0;">
+                    Your AI response will appear here...
+                </p>
+            </div>
+            <div id="status" class="status hidden">
+                <div class="pulse"></div>
+                <span id="status-text">Processing your request...</span>
+            </div>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
