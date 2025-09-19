@@ -62,3 +62,8 @@ body {
 #chat-container::-webkit-scrollbar-thumb:hover {
     background: #a8a8a8;
 }
+
+/* Ensure the main container doesn't scroll */
+main {
+    overflow: hidden !important;
+}

@@ -36,8 +36,8 @@
         </header>
 
         <!-- Chat Container -->
-        <main class="flex-1 container mx-auto px-4 py-6 overflow-y-auto">
-            <div id="chat-container" class="flex flex-col space-y-4 h-full">
+        <main class="flex-1 container mx-auto px-4 py-6 overflow-hidden">
+            <div id="chat-container" class="flex flex-col space-y-4 h-full overflow-y-auto" style="max-height: calc(100vh - 200px);">
                 <!-- Welcome Message -->
                 <div class="message-bubble ai-bubble" data-aos="fade-right">
                     <div class="flex items-center space-x-2 mb-1">
