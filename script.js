@@ -27,6 +27,10 @@ const settingsBtn = document.getElementById('settings-btn');
 const settingsModal = document.getElementById('settings-modal');
 const closeSettings = document.getElementById('close-settings');
 
+// Configuration - UPDATE THIS WITH YOUR RASPBERRY PI'S IP
+const RASPBERRY_PI_IP = '192.168.0.7'; // Change to your Pi's IP
+const API_URL = `http://${RASPBERRY_PI_IP}:8080/completion`;
+
 let ttsEnabled = true;
 let recognition;
 
@@ -37,7 +41,7 @@ userInput.addEventListener('input', function() {
 });
 
 // Send message
-function sendMessage() {
+async function sendMessage() {
     const message = userInput.value.trim();
     if (message === '') return;
 
@@ -63,27 +67,45 @@ function sendMessage() {
     chatContainer.scrollTop = chatContainer.scrollHeight;
     feather.replace();
 
-    // Simulate AI response after delay
-    setTimeout(() => {
+    try {
+        // Send request to llama.cpp server on Raspberry Pi
+        const response = await fetch(API_URL, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                prompt: message,
+                n_predict: 100,
+                temperature: 0.7,
+                stop: ['\n', 'User:']
+            })
+        });
+
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+
+        const data = await response.json();
+        
+        // Remove typing indicator
         chatContainer.removeChild(typingIndicator);
         
-        // In a real app, this would be an API call to your LLM
-        const responses = [
-            "I've processed your request and here's what I found...",
-            "That's an interesting question! Let me think about that...",
-            "Based on my analysis, I would recommend...",
-            "I understand what you're asking. Here's my response...",
-            "Thanks for your message! Here's what I can tell you..."
-        ];
-        const randomResponse = responses[Math.floor(Math.random() * responses.length)];
-        
-        addMessage(randomResponse, 'ai');
+        // Add AI response
+        addMessage(data.content, 'ai');
         
         // Speak the response if TTS is enabled
         if (ttsEnabled) {
-            speak(randomResponse);
+            speak(data.content);
         }
-    }, 1500);
+    } catch (error) {
+        // Remove typing indicator
+        chatContainer.removeChild(typingIndicator);
+        
+        // Show error message
+        addMessage('Error connecting to AI: ' + error.message, 'ai');
+        console.error('Error:', error);
+    }
 }
 
 // Add message to chat
@@ -196,3 +218,21 @@ settingsModal.addEventListener('click', function(e) {
         settingsModal.classList.add('hidden');
     }
 });
+
+// Test connection on load
+async function testConnection() {
+    try {
+        const response = await fetch(`http://${RASPBERRY_PI_IP}:8080/health`, {
+            method: 'GET'
+        });
+        if (response.ok) {
+            console.log('Connected to Raspberry Pi successfully!');
+        }
+    } catch (error) {
+        console.error('Could not connect to Raspberry Pi:', error);
+        addMessage('Could not connect to AI server. Please check if the server is running on your Raspberry Pi.', 'ai');
+    }
+}
+
+// Test connection when page loads
+window.addEventListener('load', testConnection);
