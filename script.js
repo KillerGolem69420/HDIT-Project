@@ -18,7 +18,15 @@ VANTA.GLOBE({
 });
 
 // Chat functionality - UPDATE THIS IP ADDRESS!
-const RASPBERRY_PI_IP = '192.168.0.7'; // ⬅️ CHANGE THIS to your Pi's IP
+let RASPBERRY_PI_IP = localStorage.getItem('llamaServerIP') || '192.168.0.7';
+
+// Add a function to change IP
+function updateServerIP(newIP) {
+    RASPBERRY_PI_IP = newIP;
+    localStorage.setItem('llamaServerIP', newIP);
+    alert('Server IP updated to: ' + newIP);
+}
+
 const API_URL = `http://${RASPBERRY_PI_IP}:8080/v1/chat/completions`;
 
 const chatContainer = document.getElementById('chat-container');
