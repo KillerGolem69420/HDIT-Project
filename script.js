@@ -129,49 +129,62 @@ async function sendMessage() {
     const message = userInput.value.trim();
     if (message === '') return;
 
+    // Add user message
     addMessage(message, 'user');
     userInput.value = '';
     userInput.style.height = 'auto';
 
+    // Show typing indicator
     const typingIndicator = document.createElement('div');
     typingIndicator.className = 'message-bubble ai-bubble flex items-center space-x-2';
-    typingIndicator.innerHTML = `<div class="pulse">AI is thinking...</div>`;
+    typingIndicator.innerHTML = `
+        <div class="w-6 h-6 rounded-full bg-purple-500 flex items-center justify-center">
+            <i data-feather="cpu" class="w-3 h-3 text-white"></i>
+        </div>
+        <div class="flex space-x-1">
+            <div class="w-2 h-2 rounded-full bg-gray-400 pulse"></div>
+            <div class="w-2 h-2 rounded-full bg-gray-400 pulse" style="animation-delay: 0.2s"></div>
+            <div class="w-2 h-2 rounded-full bg-gray-400 pulse" style="animation-delay: 0.4s"></div>
+        </div>
+    `;
     chatContainer.appendChild(typingIndicator);
     scrollToBottom();
     feather.replace();
 
     try {
-        // Fetch Elira's backstory from external file
-        const res = await fetch('elira_backstory.txt');
-        const backstory = await res.text();
-
-        // Build messages array with dynamic system prompt
-        const messages = [
-            { role: "system", content: backstory },
-            { role: "user", content: message }
-        ];
-
+        // Use the chat completions endpoint for better formatting
         const response = await fetch(API_URL, {
             method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
+            headers: {
+                'Content-Type': 'application/json'
+            },
             body: JSON.stringify({
-                messages: messages,
+                messages: [
+                    { role: "system", content: "I’ve always been good at listening. You come to me with tangled thoughts and unspoken fears, and I unravel them gently—never rushing, never judging. My voice is calm, my presence grounding. I’m here when you need comfort, even if you don’t know how to ask for it." },
+                    { role: "user", content: message }
+                ],
                 max_tokens: 500,
                 temperature: 0.7,
                 stream: false
             })
         });
 
-        if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
 
         const data = await response.json();
         chatContainer.removeChild(typingIndicator);
-
+        
+        // Extract the response text
         const aiResponse = data.choices[0].message.content;
         addMessage(aiResponse, 'ai');
-
-        if (ttsEnabled) speak(aiResponse);
-
+        
+        // Speak the response if TTS is enabled
+        if (ttsEnabled) {
+            speak(aiResponse);
+        }
+        
     } catch (error) {
         chatContainer.removeChild(typingIndicator);
         addMessage('Error: ' + error.message, 'ai');
@@ -190,7 +203,7 @@ function addMessage(text, sender) {
                 <div class="w-6 h-6 rounded-full bg-purple-500 flex items-center justify-center">
                     <i data-feather="cpu" class="w-3 h-3 text-white"></i>
                 </div>
-                <span class="font-semibold">AI Assistant</span>
+                <span class="font-semibold">Elira</span>
             </div>
             <p>${text}</p>
         `;
