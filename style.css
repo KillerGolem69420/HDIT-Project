@@ -124,3 +124,35 @@ main {
         animation: octocat-wave 560ms ease-in-out;
     }
 }
+
+/* Settings modal styles */
+#settings-modal {
+    transition: opacity 0.3s ease;
+}
+
+#speech-rate {
+    -webkit-appearance: none;
+    height: 8px;
+    border-radius: 4px;
+    background: #d1d5db;
+    outline: none;
+}
+
+#speech-rate::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    background: #3b82f6;
+    cursor: pointer;
+}
+
+#speech-rate::-moz-range-thumb {
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    background: #3b82f6;
+    cursor: pointer;
+    border: none;
+}
